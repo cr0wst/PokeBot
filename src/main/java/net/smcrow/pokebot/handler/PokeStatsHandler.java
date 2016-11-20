@@ -1,9 +1,8 @@
-package net.smcrow.pokebot.message;
+package net.smcrow.pokebot.handler;
 
 import me.sargunvohra.lib.pokekotlin.client.PokeApi;
 import me.sargunvohra.lib.pokekotlin.client.PokeApiClient;
 import me.sargunvohra.lib.pokekotlin.model.Pokemon;
-import me.sargunvohra.lib.pokekotlin.model.PokemonEntry;
 import me.sargunvohra.lib.pokekotlin.model.PokemonStat;
 import net.smcrow.pokebot.constants.PokemonList;
 import org.jibble.pircbot.Colors;
@@ -19,7 +18,7 @@ public class PokeStatsHandler {
      * and give the target back.  If the !stats command is not read correctly, send back the help text.
      * @param channel The channel.
      * @param sender The sender.
-     * @param message The message
+     * @param message The handler
      * @return The response as a String to send back to the channel.
      */
     public static String buildResponse(String channel, String sender, String message) {
@@ -48,8 +47,8 @@ public class PokeStatsHandler {
     /**
      * Method for building stats using the PokeAPI.  Does some basic validation, could be improved.
      * @param sender The sender.
-     * @param message The message that the sender sent.
-     * @return The stats message.
+     * @param message The handler that the sender sent.
+     * @return The stats handler.
      */
     private static String buildStats(String sender, String message) {
         String response = "";

@@ -1,7 +1,7 @@
 package net.smcrow.pokebot.bot;
 
 import net.smcrow.pokebot.constants.Settings;
-import net.smcrow.pokebot.message.PokemonAPIMessageHandler;
+import net.smcrow.pokebot.handler.PokemonAPIMessageHandler;
 import org.jibble.pircbot.PircBot;
 
 /**
@@ -15,7 +15,7 @@ public class PokeBot extends PircBot {
 
     @Override
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
-        // Determine if this is an api message or not
+        // Determine if this is an api handler or not
         if (PokemonAPIMessageHandler.canHandle(message)) {
             this.sendMessage(channel, PokemonAPIMessageHandler.buildResponse(channel, sender, message));
         } else {

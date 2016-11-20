@@ -1,4 +1,4 @@
-package net.smcrow.pokebot.message;
+package net.smcrow.pokebot.handler;
 
 /**
  * Created by crow on 11/19/16.
@@ -12,8 +12,8 @@ public class PokemonAPIMessageHandler {
     private static final String [] HANDLED_MESSAGES = {"!stats"};
 
     /**
-     * Determines if the handler should handle the message based on the prefix.
-     * @param message The message coming in.
+     * Determines if the handler should handle the handler based on the prefix.
+     * @param message The handler coming in.
      * @return True or False depending on if the handler should handle it.
      */
     public static boolean canHandle(String message) {
@@ -30,7 +30,7 @@ public class PokemonAPIMessageHandler {
      * Build the response using other handlers.
      * @param channel The channel.
      * @param sender The sender.
-     * @param message The message that was sent.
+     * @param message The handler that was sent.
      * @return A string to send back to the channel.
      */
     public static String buildResponse(String channel, String sender, String message) {
