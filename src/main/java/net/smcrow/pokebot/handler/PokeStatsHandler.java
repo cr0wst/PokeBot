@@ -5,79 +5,80 @@ import me.sargunvohra.lib.pokekotlin.client.PokeApiClient;
 import me.sargunvohra.lib.pokekotlin.model.Pokemon;
 import me.sargunvohra.lib.pokekotlin.model.PokemonStat;
 import net.smcrow.pokebot.constants.PokemonList;
+import org.apache.commons.lang3.StringUtils;
 import org.jibble.pircbot.Colors;
 
 /**
  * Handler for the Pokemon Stats !stats Command
  * Created by crow on 11/19/16.
  */
-public class PokeStatsHandler {
-
+class PokeStatsHandler extends MessageResponseHandler {
     /**
-     * Build the response to send back to the channel.  Eventually we should put this in a transfer object
-     * and give the target back.  If the !stats command is not read correctly, send back the help text.
-     * @param channel The channel.
-     * @param sender The sender.
-     * @param message The handler
-     * @return The response as a String to send back to the channel.
+     * Private enumeration to handle translating the stat name from the API to the IRC-Output name.
      */
-    public static String buildResponse(String channel, String sender, String message) {
-        if (message != null) {
-            // If only "!stats" is sent, display instructions.  Otherwise we know they sent at least !stats
-            // to get to this handler.
-            if ("!stats".equalsIgnoreCase(message)) {
-                return buildStatsHelp(sender);
-            } else if (message.contains(" ")) {
-                return buildStats(sender, message);
-            }
+    private enum StatName {
+        SPD ("speed", "SPD"),
+        SP_D ("special-defense", "SpDEF"),
+        SP_A ("special-attack", "SpATK"),
+        DEF ("defense", "DEF"),
+        ATK ("attack", "ATK"),
+        HP ("hp", "HP"),
+        UNKNOWN_STAT ("", "");
+        String apiName;
+        String outputName;
+
+        StatName(String apiName, String outputName) {
+            this.apiName = apiName;
+            this.outputName = outputName;
         }
 
-        return "";
+        public static StatName lookupStatFromApiName(String apiName) {
+            if (StringUtils.isNotBlank(apiName)) {
+                for (StatName stat : StatName.values()) {
+                    if (stat.apiName.equals(apiName)) {
+                        return stat;
+                    }
+                }
+            }
+            return UNKNOWN_STAT;
+        }
+
+        /**
+         * @return The output name for the stat.
+         */
+        public String getOutputName() {
+            return this.outputName;
+        }
+
     }
 
-    /**
-     * The standard help text.  Should move to a constant.
-     * @param sender The sender.
-     * @return The help text.
-     */
-    private static String buildStatsHelp(String sender) {
+    @Override
+    protected String helpMessage(String sender) {
         return sender + ": !stats <pokemon> to view base stats.";
     }
 
-    /**
-     * Method for building stats using the PokeAPI.  Does some basic validation, could be improved.
-     * @param sender The sender.
-     * @param message The handler that the sender sent.
-     * @return The stats handler.
-     */
-    private static String buildStats(String sender, String message) {
+    @Override
+    protected String responseMessage(String pokemonName) {
         String response = "";
-        String[] messageComponents = message.split(" ");
-
-        if (messageComponents.length > 1) {
-            String query = messageComponents[1];
-            // Some pokemon have a space between their names
-            if (messageComponents.length > 2) {
-                query += " " + messageComponents[2];
-            }
-
-            int pokemonId = PokemonList.getPokemonIdByName(query);
+        int pokemonId = PokemonList.getPokemonIdByName(pokemonName);
             // Pokemon ID = 0 => Pokemon Not Found
             if (pokemonId > 0) {
                 final PokeApi api = new PokeApiClient();
-                Pokemon pokemonInfo = api.getPokemon(PokemonList.getPokemonIdByName(query));
+                Pokemon pokemonInfo = api.getPokemon(pokemonId);
 
-                //TODO: Clean this up.
-                response += sender + ": Stats for " + Colors.BOLD + pokemonInfo.getName().toUpperCase()
-                        + Colors.BOLD + " - ";
+                // Header Line
+                response += "Stats for " + Colors.RED + pokemonInfo.getName().toUpperCase() + Colors.NORMAL + " - ";
+
+                // Build the Statistics from the API
                 for (PokemonStat stat : pokemonInfo.getStats()) {
-                    response += stat.getStat().getName() + ": " + stat.getBaseStat() + " ";
+                    response += Colors.BOLD
+                    + StatName.lookupStatFromApiName(stat.getStat().getName()).getOutputName() + ": "
+                    + Colors.BOLD
+                    + stat.getBaseStat() + " ";
                 }
             } else {
-                return "Couldn't find stats for " + Colors.BOLD + query.toUpperCase() + Colors.BOLD;
+                response = "Couldn't find stats for " + Colors.BOLD + pokemonName.toUpperCase() + Colors.BOLD;
             }
-        }
-
         return response;
     }
 }

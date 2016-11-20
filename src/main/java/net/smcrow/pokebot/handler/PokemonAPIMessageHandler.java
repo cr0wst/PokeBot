@@ -1,5 +1,7 @@
 package net.smcrow.pokebot.handler;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Created by crow on 11/19/16.
  * Handler for handling onMessage events that pass through the pokemon api.
@@ -9,7 +11,8 @@ public class PokemonAPIMessageHandler {
     /**
      * List of commands that are supported by this handler.
      */
-    private static final String [] HANDLED_MESSAGES = {"!stats"};
+    //TODO: Switch to static factory which would allow for the pre-loading of handlers and let them list their commands.
+    private static final String [] HANDLED_MESSAGES = {"!stats", "!evolve"};
 
     /**
      * Determines if the handler should handle the handler based on the prefix.
@@ -35,10 +38,31 @@ public class PokemonAPIMessageHandler {
      */
     public static String buildResponse(String channel, String sender, String message) {
         if (message != null) {
-            //TODO: Consider making this into a private enumeration that can be switched over.
-            if (message.startsWith("!stats")) {
-                return PokeStatsHandler.buildResponse(channel, sender, message);
+            String command;
+            String params = "";
+            if (StringUtils.contains(message, ' ')) {
+                final int firstSpaceIndex = StringUtils.indexOf(message, ' ');
+                command = StringUtils.substring(message, 0, firstSpaceIndex);
+                params = StringUtils.substring(message, firstSpaceIndex + 1);
+            } else {
+                command = message;
             }
+
+            MessageResponseHandler handler;
+            switch (command) {
+                case "!stats":
+                    handler = new PokeStatsHandler();
+                    break;
+                case "!evolve":
+                    handler = new PokeEvolveHandler();
+                    break;
+                default:
+                    // This should never happen, but just in case it does, we will handle it.  Insures
+                    // that handler always gets initialized.
+                    return "";
+            }
+
+            return handler.buildResponse(channel, sender, command, params);
         }
 
         return "";
