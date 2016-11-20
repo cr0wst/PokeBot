@@ -5,7 +5,7 @@ package net.smcrow.pokebot.constants;
  * List of all of the pokemon as of Sun and Moon.  Their position in the array represents their NationalDex number.
  */
 public class PokemonList {
-    public static final String [] POKEMON_LIST = {
+    private static final String [] POKEMON_LIST = {
                 "Bulbasaur",
                 "Ivysaur",
                 "Venusaur",
